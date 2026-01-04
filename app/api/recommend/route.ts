@@ -1,24 +1,30 @@
-   import { supabase } from "@/lib/supabase";
+import { NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
 
 export async function POST(req: Request) {
-  const answers = await req.json();
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-  const { data: books } = await supabase.from("books").select("*");
+  if (!supabaseUrl || !supabaseKey) {
+    return NextResponse.json(
+      { error: "Supabase env vars missing" },
+      { status: 500 }
+    );
+  }
 
-  const ranked = books!.map(book => {
-    let score = 0;
+  const supabase = createClient(supabaseUrl, supabaseKey);
 
-    if (book.category === answers.category) score += 3;
-    if (book.level === answers.level) score += 2;
+  const body = await req.json();
+  const { topic, level } = body;
 
-    answers.goals.forEach((goal: string) => {
-      if (book.goals.includes(goal)) score += 2;
-    });
+  const { data: books } = await supabase
+    .from("books")
+    .select("*");
 
-    return { ...book, score };
-  });
+  // مثال ترشيح بسيط
+  const result = books?.filter(book =>
+    book.category.includes(topic)
+  );
 
-  ranked.sort((a, b) => b.score - a.score);
-
-  return Response.json(ranked.slice(0, 3));
+  return NextResponse.json(result);
 }
