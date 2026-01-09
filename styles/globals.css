@@ -1,3 +1,23 @@
+.result-card {
+  border-left: 6px solid #2563eb;
+  transition: transform .2s;
+}
+
+.result-card:hover {
+  transform: translateY(-5px);
+}
+
+.result-card ul {
+  margin: 12px 0;
+  padding-left: 18px;
+}
+
+.result-card li {
+  font-size: 14px;
+  color: #374151;
+}
+
+/*
 body { 
   font-family: system-ui;
   background: #f7f7f7;
@@ -29,3 +49,4 @@ button {
   background: #2563eb;
   color: white;
 }
+*/
