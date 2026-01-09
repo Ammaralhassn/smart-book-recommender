@@ -1,3 +1,23 @@
+import "../styles/globals.css"; // ← هذا هو السطر الحاسم
+
+export const metadata = {
+  title: "Smart Book Recommender",
+  description: "اختر كتابك المناسب خطوة بخطوة",
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="ar" dir="rtl">
+      <body>{children}</body>
+    </html>
+  );
+}
+
+/*
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -32,3 +52,4 @@ export default function RootLayout({
     </html>
   );
 }
+*/
