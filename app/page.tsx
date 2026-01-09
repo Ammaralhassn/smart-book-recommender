@@ -1,74 +1,97 @@
 "use client";
 import { useState } from "react";
 
-const allSteps = [
-  { key: "category", q: "ماذا تريد أن تتعلم؟", options: ["برمجة ويب","قواعد البيانات","الشبكات","الأمن السيبراني"] },
-  { key: "goal", q: "ما هدفك؟", options: ["وظيفة","مشروع عملي","تعلم أكاديمي"] },
-  { key: "level", q: "مستواك؟", options: ["مبتدئ","متوسط","متقدم"] },
-  { key: "learning_style", q: "أسلوب التعلم المفضل؟", options: ["شرح مبسط","مشاريع عملية","شرح أكاديمي"] },
-  { key: "language", q: "لغة المحتوى؟", options: ["عربي","إنجليزي","لا يهم"] },
-  { key: "duration", q: "كم وقتك للتعلم؟", options: ["قصير","متوسط","طويل"] },
+const steps = [
+  {
+    key: "category",
+    title: "ماذا تريد أن تتعلم؟",
+    options: ["برمجة ويب", "قواعد البيانات", "الشبكات", "الأمن السيبراني"]
+  },
+  {
+    key: "goal",
+    title: "ما هدفك من التعلم؟",
+    options: ["وظيفة", "مشروع عملي", "تعلم أكاديمي"]
+  },
+  {
+    key: "level",
+    title: "ما مستواك الحالي؟",
+    options: ["مبتدئ", "متوسط", "متقدم"]
+  },
+  {
+    key: "style",
+    title: "كيف تحب أن تتعلم؟",
+    options: ["شرح مبسط", "تطبيق عملي", "شرح عميق"]
+  }
 ];
 
-export default function Wizard() {
+export default function BookFinder() {
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<any>({});
-  const [books, setBooks] = useState<any[]>([]);
-
-  const visibleSteps = allSteps.filter(s =>
-    !(answers.level === "مبتدئ" && s.key === "duration")
-  );
+  const [results, setResults] = useState<any[]>([]);
+  const current = steps[step];
 
   const choose = (value: string) => {
-    setAnswers({ ...answers, [visibleSteps[step].key]: value });
+    setAnswers({ ...answers, [current.key]: value });
     setStep(step + 1);
   };
 
-  const submit = async () => {
+  const fetchResults = async () => {
     const res = await fetch("/api/recommend", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(answers)
     });
-    setBooks(await res.json());
+    setResults(await res.json());
   };
 
   return (
-    <main className="container">
-      <h1>📚 اختر كتابك المثالي</h1>
+    <main className="page">
+      {step < steps.length ? (
+        <section className="step">
+          <h1>{current.title}</h1>
 
-      <div className="progress">
-        <span style={{ width: `${(step / visibleSteps.length) * 100}%` }} />
-      </div>
-
-      {step < visibleSteps.length && (
-        <div className="card">
-          <h2>{visibleSteps[step].q}</h2>
-          {visibleSteps[step].options.map(o => (
-            <button key={o} onClick={() => choose(o)}>{o}</button>
-          ))}
-        </div>
-      )}
-
-      {step === visibleSteps.length && (
-        <button className="primary" onClick={submit}>🔍 عرض أفضل الكتب</button>
-      )}
-
-      {books.map(book => (
-        <div className="result-card" key={book.id}>
-          <h3>{book.title}</h3>
-          <p>{book.description}</p>
-
-          <ul>
-            {book.reasons.map((r: string, i: number) => (
-              <li key={i}>✅ {r}</li>
+          <div className="options">
+            {current.options.map(o => (
+              <div key={o} className="option-card" onClick={() => choose(o)}>
+                {o}
+              </div>
             ))}
-          </ul>
+          </div>
 
-          <strong>⭐ درجة التوافق: {book.score}%</strong><br/>
-          <a href={book.salla_url} target="_blank">اشترِ الآن</a>
-        </div>
-      ))}
+          <div className="progress">
+            {step + 1} / {steps.length}
+          </div>
+        </section>
+      ) : (
+        <section className="results">
+          <h1>📚 أفضل الكتب لك</h1>
+
+          <button className="primary" onClick={fetchResults}>
+            عرض النتائج
+          </button>
+
+          <div className="grid">
+            {results.map(book => (
+              <div key={book.id} className="book-card">
+                <h3>{book.title}</h3>
+                <p>{book.description}</p>
+
+                <ul>
+                  {book.reasons.map((r: string, i: number) => (
+                    <li key={i}>✓ {r}</li>
+                  ))}
+                </ul>
+
+                <div className="score">⭐ {book.score}% توافق</div>
+
+                <a href={book.salla_url} target="_blank">
+                  شراء الكتاب
+                </a>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
     </main>
   );
 }
