@@ -1,21 +1,4 @@
 import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
-
-export async function POST(req: Request) {
-  const body = await req.json();
-  const { topic, level } = body;
-
-  const { data: books } = await supabase
-    .from("books")
-    .select("*")
-    .ilike("category", `%${topic}%`)
-    .ilike("level", `%${level}%`);
-
-  return NextResponse.json(books ?? []);
-}
-
-/*
-import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
 export async function POST(req: Request) {
@@ -45,4 +28,3 @@ export async function POST(req: Request) {
 
   return NextResponse.json(result);
 }
-*/
